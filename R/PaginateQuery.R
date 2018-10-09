@@ -1,4 +1,3 @@
-#' @title
 #' Paginate through pages of Google Analytics Query responses
 #' 
 #' In case if a single query returns more than 10k rows,the Core Reporting API returns a subset of
@@ -16,10 +15,12 @@
 #' 
 #' @param token Token Object created by \code{Auth()} 
 #' 
+#' @param delay Time delay in seconds between successive queries in order to avoid Rate Limit Error 
+#' 
 #' @return list containing Column Headers and the data collated across all the pages of the query
 #' 
 #' 
-PaginateQuery <- function(query.builder, pages, token) {
+PaginateQuery <- function(query.builder, pages, token, delay) {
   
   kMaxDefaultRows <- get("kMaxDefaultRows", envir=rga.environment)
   
@@ -32,10 +33,11 @@ PaginateQuery <- function(query.builder, pages, token) {
   for (i in (1:(pages - 1))) {
     dataframe.param <- data.frame()
     start.index <- (i * kMaxDefaultRows) + 1
-    cat("Getting data starting at row", start.index, "\n")
+    message("Getting data starting at row ", start.index)
     query.builder$SetStartIndex(start.index)
     query.uri <- ToUri(query.builder, token)
-    ga.list <- GetDataFeed(query.uri)
+    Sys.sleep(delay)
+    ga.list <- GetDataFeed(query.uri, caching.dir = query.builder$caching.dir, caching = query.builder$caching)
     dataframe.param <- rbind(dataframe.param,
                              do.call(rbind, as.list(ga.list$rows)))
     df.inner <- rbind(df.inner, dataframe.param)

@@ -1,6 +1,8 @@
 #' Returns the URI constructed from the parameter settings. This also
 #' URI-encodes all the values in each query parameter.
 #' 
+#' @importFrom utils URLencode
+#' 
 #' @param query.builder Name of the Object of the Query Builder Class
 #' 
 #' @param token Token object containing the OAuth2.0 Authentication details
@@ -36,12 +38,12 @@ ToUri <- function(query.builder,token) {
                        start.index = "start-index",
                        table.id    = "ids",
                        access_token = "access_token")
-    
+
     if (!is.null(uri.name)) {
       uri <- paste(uri,
-                   uri.name,
+                   URLencode(uri.name, reserved = TRUE),
                    "=",
-                   query[[name]],
+                   URLencode(query[[name]], reserved = TRUE),
                    "&",
                    sep = "",
                    collapse = "")
